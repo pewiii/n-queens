@@ -194,6 +194,7 @@ describe('Board', function() {
     });
 
     it('should find a minorDiagonal conflict', function() {
+      // debugger;
       expect(board.hasAnyMinorDiagonalConflicts()).to.be.equal(true);
     });
 
