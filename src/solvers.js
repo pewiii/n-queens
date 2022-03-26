@@ -21,23 +21,25 @@ window.findNRooksSolution = function(n) {
   var board = new Board({n: n});
   var rows = board.rows();
   var solution = undefined; //fixme
-  //debugger;
-  var helper = function(row) {
+  var taken = {};
+  var nRook = function(row) {
     if (row === n) {
+      found = true;
       return;
     }
-    for (var i = 0; i < rows.length; i++) {
-      rows[row][i] = 1;
-      if (board.hasAnyRowConflicts() || board.hasAnyColConflicts()) {
-        rows[row][i] = 0;
-        continue;
+    for (var col = 0; col < n; col++) {
+      if (taken[col] === 1) { continue; }
+      rows[row][col] = 1;
+      taken[col] = 1;
+      nRook(row + 1);
+      if (found) {
+        return;
       }
-      if (row < rows.length) {
-        helper(row + 1);
-      }
+      rows[row][col] = 0;
+      taken[col] = 0;
     }
   };
-  helper(0);
+  nRook(0);
   solution = rows;
   console.log('Single solution for ' + n + ' rooks:', JSON.stringify(solution));
   return solution;
@@ -48,29 +50,27 @@ window.findNRooksSolution = function(n) {
 //[0,0,0,1]
 //[0,0,1,0]
 // return the number of nxn chessboards that exist, with n rooks placed such that none of them can attack each other
+
 window.countNRooksSolutions = function(n) {
-  var solutionCount = 0; //fixme
+  var solutionCount = 0;
   var board = new Board({n: n});
   var rows = board.rows();
   var taken = {};
   var nRook = function(row) {
-    for (var i = 0; i < rows.length; i++) {
-      if (taken[i] === 1) { continue; }
-      rows[row][i] = 1;
-      taken[i] = 1;
-      if (row < n - 1) {
-        nRook(row + 1);
-      } else {
-        if (!board.hasAnyColConflicts() && !board.hasAnyRowConflicts()) {
-          solutionCount++;
-        }
-      }
-      rows[row][i] = 0;
-      taken[i] = 0;
+    if (row === n) {
+      solutionCount = solutionCount + 1;
+      return;
+    }
+    for (var col = 0; col < n; col++) {
+      if (taken[col] === 1) { continue; }
+      rows[row][col] = 1;
+      taken[col] = 1;
+      nRook(row + 1);
+      rows[row][col] = 0;
+      taken[col] = 0;
     }
   };
   nRook(0);
-  console.log('Number of solutions for ' + n + ' rooks:', solutionCount);
   return solutionCount;
 };
 
@@ -81,37 +81,6 @@ window.countNRooksSolutions = function(n) {
 //[0,0,0,0]
 //[0,0,1,0]
 
-// window.findNQueensSolution = function(n) {
-//   var solution = undefined;
-//   var board = new Board({n: n});
-//   var rows = board.rows();
-//   var found = false;
-//   var taken = {};
-//   var queen = function(row) {
-//     for (var col = 0; col < rows.length; col++) {
-//       if (taken[col] === 1) { continue; }
-//       rows[row][col] = 1;
-//       taken[col] = 1;
-//       if (row < n - 1) {
-//         queen(row + 1);
-//       } else {
-//         if (!board.hasAnyQueensConflicts()) {
-//           found = true;
-//           return;
-//         }
-//       }
-//       if (found) {
-//         return;
-//       }
-//       rows[row][col] = 0;
-//       taken[col] = 0;
-//     }
-//   };
-
-//   queen(0);
-//   solution = rows;
-//   return solution;
-// };
 window.findNQueensSolution = function(n) {
   var solution = undefined;
   var board = new Board({n: n});
@@ -122,7 +91,6 @@ window.findNQueensSolution = function(n) {
       found = true;
       return;
     }
-
     for (var col = 0; col < n; col++) {
       rows[row][col] = 1;
       if (!board.hasAnyQueensConflicts()) {
@@ -146,19 +114,21 @@ window.countNQueensSolutions = function(n) {
   var solutionCount = 0;
   var board = new Board({n: n});
   var rows = board.rows();
-
+  var taken = {};
   var nqueen = function (row) {
     if (row === n) {
       solutionCount = solutionCount + 1;
       return;
     }
-
     for (var col = 0; col < n; col++) {
+      if (taken[col] === 1) { continue; }
       rows[row][col] = 1;
-      if (!board.hasAnyQueensConflicts()) {
+      taken[col] = 1;
+      if (!board.hasAnyMajorDiagonalConflicts() && !board.hasAnyMinorDiagonalConflicts()) {
         nqueen(row + 1);
       }
       rows[row][col] = 0;
+      taken[col] = 0;
     }
   };
   nqueen(0);
